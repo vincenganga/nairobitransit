@@ -69,7 +69,7 @@ class Submission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     submission_type = db.Column(db.String(40), nullable=False)  # "route" | "stop" | "fare"
-    payload = db.Column(db.JSON, nullable=False)  # the proposed data, e.g. {"route_id":1,"min_fare":50,...}
+    payload = db.Column(db.JSON, nullable=False)  # the proposed data, e.g. {"route_id":1,"min_fare":50}
     status = db.Column(db.String(20), default="pending")  # "pending" | "approved" | "rejected"
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reviewed_at = db.Column(db.DateTime, nullable=True)

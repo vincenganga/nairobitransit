@@ -16,7 +16,7 @@ def create_app():
     app = Flask(__name__)
 
     # --- Configuration ---
-    # For local development we use SQLite; swap to PostgreSQL (Supabase) in production
+    # For local development we use SQLite; PostgreSQL (Supabase) in production
     # by setting the DATABASE_URL environment variable.
     app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
         "DATABASE_URL", "sqlite:///nairobitransit.db"
@@ -38,7 +38,7 @@ def create_app():
     app.register_blueprint(routes_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
-    # Create tables if they don't exist yet (fine for dev; we'll use migrations later if needed)
+    # Create tables if they don't exist yet
     with app.app_context():
         db.create_all()
 

@@ -74,8 +74,6 @@ def create_submission():
 @jwt_required()
 def list_pending_submissions():
     """Admin-only: list all pending submissions for review."""
-    # NOTE: in a later task, add an is_admin check here using get_jwt_identity()
-    # and looking up the user, returning 403 if not an admin.
     pending = Submission.query.filter_by(status="pending").all()
     return jsonify([_submission_to_dict(s) for s in pending]), 200
 
@@ -97,7 +95,7 @@ def review_submission(submission_id):
     submission.status = decision
     db.session.commit()
 
-    # TODO (Week 11): if approved, apply the payload to the actual Route/Stop/Fare tables
+    # TODO (Week 11): Apply the payload to the actual Route/Stop/Fare tables
 
     return jsonify({"message": f"Submission {decision}"}), 200
 

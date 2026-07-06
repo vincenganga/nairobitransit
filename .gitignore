@@ -24,6 +24,7 @@ MANIFEST
 .installed.cfg
 
 # Flask
+instance
 instance/*
 !instance/.gitignore
 .webassets-cache
@@ -110,4 +111,4 @@ celerybeat.pid
 
 # --- Environment variables ---
 .env
-.env.local
+.env.localbackend/instance/
