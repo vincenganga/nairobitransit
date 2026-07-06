@@ -24,6 +24,7 @@ MANIFEST
 .installed.cfg
 
 # Flask
+instance
 instance/*
 !instance/.gitignore
 .webassets-cache
