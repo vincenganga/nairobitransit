@@ -110,4 +110,4 @@ celerybeat.pid
 
 # --- Environment variables ---
 .env
-.env.local
+.env.localbackend/instance/
