@@ -1,49 +1,38 @@
 import AuthLayout from "../layouts/AuthLayout";
-import "../styles/auth.css";
+import { Link } from "react-router-dom";
 
 function Login() {
   return (
     <AuthLayout>
-      <div className="login-page">
 
-        <div className="login-left">
-          <h1>Nairobi Transit</h1>
-          <p>Smart Transit Management System</p>
-        </div>
+      <h2>Welcome Back</h2>
+      <p>Sign in to continue</p>
 
-        <div className="login-right">
+      <form>
 
-          <h2>Welcome Back</h2>
-          <p>Sign in to continue</p>
+        <label>Email</label>
+        <input
+          type="email"
+          placeholder="Enter your email"
+        />
 
-          <form>
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="Enter your password"
+        />
 
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-            />
+        <button type="submit">
+          Login
+        </button>
 
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-            />
+      </form>
 
-            <button type="submit">
-              Login
-            </button>
+      <p className="auth-link">
+        Don't have an account?{" "}
+        <Link to="/register">Register</Link>
+      </p>
 
-          </form>
-
-          <p>
-            Don't have an account?
-            <a href="/register"> Register</a>
-          </p>
-
-        </div>
-
-      </div>
     </AuthLayout>
   );
 }
