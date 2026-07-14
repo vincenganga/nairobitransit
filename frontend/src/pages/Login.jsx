@@ -1,49 +1,86 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "../layouts/AuthLayout";
-import "../styles/auth.css";
+import { login } from "../services/auth";
 
 function Login() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    try {
+      await login(form.email, form.password);
+
+      alert("Login successful!");
+
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   return (
     <AuthLayout>
-      <div className="login-page">
+      <h2>Welcome Back</h2>
+      <p>Sign in to continue</p>
 
-        <div className="login-left">
-          <h1>Nairobi Transit</h1>
-          <p>Smart Transit Management System</p>
-        </div>
+      <form onSubmit={handleSubmit}>
 
-        <div className="login-right">
+        <label>Email</label>
 
-          <h2>Welcome Back</h2>
-          <p>Sign in to continue</p>
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="Enter your email"
+          required
+        />
 
-          <form>
+        <label>Password</label>
 
-            <label>Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-            />
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          placeholder="Enter your password"
+          required
+        />
 
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-            />
-
-            <button type="submit">
-              Login
-            </button>
-
-          </form>
-
-          <p>
-            Don't have an account?
-            <a href="/register"> Register</a>
+        {error && (
+          <p style={{ color: "red" }}>
+            {error}
           </p>
+        )}
 
-        </div>
+        <button type="submit">
+          Login
+        </button>
 
-      </div>
+      </form>
+
+      <p className="auth-link">
+        Don't have an account?{" "}
+        <Link to="/register">Register</Link>
+      </p>
     </AuthLayout>
   );
 }

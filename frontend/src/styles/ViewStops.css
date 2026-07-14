@@ -1,0 +1,32 @@
+.table-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+
+.table-container h1 {
+  color: #15803d;
+  margin-bottom: 25px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background: #15803d;
+  color: white;
+}
+
+tr:hover {
+  background: #f9fafb;
+}

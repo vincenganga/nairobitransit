@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
 import "../styles/AddRoute.css";
 
-function AddRoute() {
+function EditRoute() {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const [route, setRoute] = useState({
     name: "",
@@ -12,263 +15,136 @@ function AddRoute() {
     verified: false,
   });
 
+  useEffect(() => {
+    fetchRoute();
+  }, []);
+
+  const fetchRoute = async () => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/api/routes/${id}`
+      );
+
+      const data = await response.json();
+
+      setRoute({
+        name: data.name,
+        origin: data.origin,
+        destination: data.destination,
+        operatingHours: data.operating_hours,
+        verified: data.verified,
+      });
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleChange = (e) => {
-
     const { name, value, type, checked } = e.target;
 
     setRoute({
       ...route,
       [name]: type === "checkbox" ? checked : value,
     });
-
   };
 
-
-
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
-
-    // Convert frontend data to backend format
-    const routeData = {
-
-      name: route.name,
-
-      origin: route.origin,
-
-      destination: route.destination,
-
-      operating_hours: route.operatingHours,
-
-      verified: route.verified,
-
-    };
-
-
     try {
-
       const response = await fetch(
-        "http://127.0.0.1:5000/api/routes",
+        `http://127.0.0.1:5000/api/routes/${id}`,
         {
-          method: "POST",
-
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-
-          body: JSON.stringify(routeData),
+          body: JSON.stringify({
+            name: route.name,
+            origin: route.origin,
+            destination: route.destination,
+            operating_hours: route.operatingHours,
+            verified: route.verified,
+          }),
         }
       );
 
-
       const data = await response.json();
 
+      alert(data.message);
 
-
-      if (response.ok) {
-
-        console.log("Route saved:", data);
-
-        alert("Route added successfully!");
-
-
-        // Clear form
-
-        setRoute({
-
-          name: "",
-
-          origin: "",
-
-          destination: "",
-
-          operatingHours: "",
-
-          verified: false,
-
-        });
-
-
-      } else {
-
-        console.error("Backend error:", data);
-
-        alert(
-          data.error || "Failed to add route"
-        );
-
-      }
-
-
+      navigate("/routes");
 
     } catch (error) {
-
-      console.error(
-        "Connection error:",
-        error
-      );
-
-      alert(
-        "Cannot connect to backend server"
-      );
-
+      console.error(error);
     }
-
   };
 
-
-
   return (
-
     <AdminLayout>
-
       <div className="form-container">
+        <h1>Edit Route</h1>
 
-        <h1>Add Route</h1>
+        <form onSubmit={handleSubmit} className="route-form">
 
-
-        <form 
-          onSubmit={handleSubmit}
-          className="route-form"
-        >
-
-
-          <label>
-            Route Name
-          </label>
-
+          <label>Route Name</label>
           <input
-
             type="text"
-
             name="name"
-
-            placeholder="e.g. Route 46"
-
             value={route.name}
-
             onChange={handleChange}
-
             required
-
           />
 
-
-
-          <label>
-            Origin
-          </label>
-
+          <label>Origin</label>
           <input
-
             type="text"
-
             name="origin"
-
-            placeholder="e.g. Nairobi CBD"
-
             value={route.origin}
-
             onChange={handleChange}
-
             required
-
           />
 
-
-
-          <label>
-            Destination
-          </label>
-
+          <label>Destination</label>
           <input
-
             type="text"
-
             name="destination"
-
-            placeholder="e.g. Rongai"
-
             value={route.destination}
-
             onChange={handleChange}
-
             required
-
           />
 
-
-
-          <label>
-            Operating Hours
-          </label>
-
+          <label>Operating Hours</label>
           <input
-
             type="text"
-
             name="operatingHours"
-
-            placeholder="e.g. 5:00 AM - 10:00 PM"
-
             value={route.operatingHours}
-
             onChange={handleChange}
-
           />
-
-
 
           <div className="checkbox-group">
-
             <input
-
               type="checkbox"
-
               id="verified"
-
               name="verified"
-
               checked={route.verified}
-
               onChange={handleChange}
-
             />
 
-
             <label htmlFor="verified">
-
               Verified Route
-
             </label>
-
-
           </div>
 
-
-
-
           <button type="submit">
-
-            Add Route
-
+            Update Route
           </button>
 
-
-
         </form>
-
-
       </div>
-
-
     </AdminLayout>
-
   );
-
 }
 
-
-export default AddRoute;
+export default EditRoute;
