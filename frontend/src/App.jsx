@@ -1,17 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import Routes from './pages/Routes'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import AddRoute from "./pages/AddRoute";
+import AddStop from "./pages/AddStop";
+import NotFound from "./pages/NotFound";
+import RoutesPage from "./pages/RoutesPage";
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  // Render your passenger discovery dashboard layout directly here
   return (
-    <Routes />
-  )
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/routes/add" element={<AddRoute />} />
+      <Route path="/stops/add" element={<AddStop />} />
+      <Route path="/routes" element={<RoutesPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;

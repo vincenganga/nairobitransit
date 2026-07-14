@@ -1,0 +1,61 @@
+.form-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  max-width: 700px;
+  margin: auto;
+}
+
+.form-container h1 {
+  margin-bottom: 25px;
+  color: #15803d;
+}
+
+.route-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-form label {
+  margin-top: 18px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.route-form input[type="text"] {
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.route-form input[type="text"]:focus {
+  outline: none;
+  border-color: #15803d;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.route-form button {
+  margin-top: 30px;
+  padding: 14px;
+  background: #15803d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: .3s;
+}
+
+.route-form button:hover {
+  background: #166534;
+}
