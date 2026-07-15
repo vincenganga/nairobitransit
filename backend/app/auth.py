@@ -1,7 +1,11 @@
 """
 Authentication endpoints: register and login.
-Uses JWT (JSON Web Tokens) so the frontend can stay "logged in" without
+Uses JWT (JSON Web Tokens) so the frontend can stay logged in without
 the backend storing sessions.
+
+Note: Werkzeug 3.x defaults to scrypt for password hashing, which requires
+Python 3.10+. Since this project uses Python 3.9, we explicitly specify
+pbkdf2:sha256, which is equally secure and works on all Python versions.
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token
@@ -32,7 +36,10 @@ def register():
     user = User(
         username=data["username"],
         email=data["email"],
-        password_hash=generate_password_hash(data["password"]),
+        # Explicitly use pbkdf2:sha256 — scrypt requires Python 3.10+
+        password_hash=generate_password_hash(
+            data["password"], method="pbkdf2:sha256"
+        ),
     )
     db.session.add(user)
     db.session.commit()
@@ -44,8 +51,8 @@ def register():
 def login():
     """
     Body: { "email": "...", "password": "..." }
-    Returns a JWT access token to use in the Authorization header
-    for protected endpoints: "Authorization: Bearer <token>"
+    Returns a JWT access token for use in the Authorization header:
+    "Authorization: Bearer <token>"
     """
     data = request.get_json()
 
@@ -58,4 +65,7 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 401
 
     access_token = create_access_token(identity=user.id)
-    return jsonify({"access_token": access_token, "username": user.username}), 200
+    return jsonify({
+        "access_token": access_token,
+        "username": user.username
+    }), 200
