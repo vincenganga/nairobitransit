@@ -4,6 +4,7 @@ function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
 
   if (!token) {
+    // Redirect to /login (not just /) so the path is explicit
     return <Navigate to="/login" replace />;
   }
 

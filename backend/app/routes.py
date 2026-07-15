@@ -24,9 +24,7 @@ def search_routes():
     Search routes by origin, destination or route name.
     Returns all routes if no query is provided.
     """
-
     query = request.args.get("query", "").strip().lower()
-
     routes_query = Route.query
 
     if query:
@@ -39,7 +37,6 @@ def search_routes():
         )
 
     routes = routes_query.all()
-
     return jsonify([_route_to_dict(route) for route in routes]), 200
 
 
@@ -49,19 +46,12 @@ def search_routes():
 
 @bp.route("/routes", methods=["POST"])
 def create_route():
-
     data = request.get_json()
 
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    required_fields = [
-        "name",
-        "origin",
-        "destination",
-        "operating_hours",
-    ]
-
+    required_fields = ["name", "origin", "destination", "operating_hours"]
     for field in required_fields:
         if field not in data:
             return jsonify({"error": f"{field} is required"}), 400
@@ -82,27 +72,16 @@ def create_route():
         "route": _route_to_dict(route)
     }), 201
 
+
 # ==========================
-# DELETE ROUTE
+# GET SINGLE ROUTE
 # ==========================
 
-@bp.route("/routes/<int:route_id>", methods=["DELETE"])
-def delete_route(route_id):
+@bp.route("/routes/<int:route_id>", methods=["GET"])
+def get_route(route_id):
     route = Route.query.get_or_404(route_id)
+    return jsonify(_route_to_dict(route, include_stops=True)), 200
 
-    # Delete all fares for this route
-    Fare.query.filter_by(route_id=route.id).delete()
-
-    # Delete all stops for this route
-    Stop.query.filter_by(route_id=route.id).delete()
-
-    # Delete the route
-    db.session.delete(route)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Route deleted successfully"
-    }), 200
 
 # ==========================
 # UPDATE ROUTE
@@ -110,9 +89,7 @@ def delete_route(route_id):
 
 @bp.route("/routes/<int:route_id>", methods=["PUT"])
 def update_route(route_id):
-
     route = Route.query.get_or_404(route_id)
-
     data = request.get_json()
 
     if not data:
@@ -121,14 +98,8 @@ def update_route(route_id):
     route.name = data.get("name", route.name)
     route.origin = data.get("origin", route.origin)
     route.destination = data.get("destination", route.destination)
-    route.operating_hours = data.get(
-        "operating_hours",
-        route.operating_hours
-    )
-    route.verified = data.get(
-        "verified",
-        route.verified
-    )
+    route.operating_hours = data.get("operating_hours", route.operating_hours)
+    route.verified = data.get("verified", route.verified)
 
     db.session.commit()
 
@@ -137,32 +108,50 @@ def update_route(route_id):
         "route": _route_to_dict(route)
     }), 200
 
+
+# ==========================
+# DELETE ROUTE
+# ==========================
+
+@bp.route("/routes/<int:route_id>", methods=["DELETE"])
+def delete_route(route_id):
+    route = Route.query.get_or_404(route_id)
+
+    Fare.query.filter_by(route_id=route.id).delete()
+    Stop.query.filter_by(route_id=route.id).delete()
+    db.session.delete(route)
+    db.session.commit()
+
+    return jsonify({"message": "Route deleted successfully"}), 200
+
+
+# ==========================
+# GET ALL STOPS
+# ==========================
+
+@bp.route("/stops", methods=["GET"])
+def get_stops():
+    stops = Stop.query.order_by(Stop.sequence).all()
+    return jsonify([_stop_to_dict(stop) for stop in stops]), 200
+
+
 # ==========================
 # CREATE STOP
 # ==========================
 
 @bp.route("/stops", methods=["POST"])
 def create_stop():
-
     data = request.get_json()
 
     if not data:
         return jsonify({"error": "No data provided"}), 400
 
-    required_fields = [
-        "route_id",
-        "name",
-        "latitude",
-        "longitude",
-        "sequence",
-    ]
-
+    required_fields = ["route_id", "name", "latitude", "longitude", "sequence"]
     for field in required_fields:
         if field not in data:
             return jsonify({"error": f"{field} is required"}), 400
 
     route = Route.query.get(data["route_id"])
-
     if not route:
         return jsonify({"error": "Route not found"}), 404
 
@@ -179,49 +168,20 @@ def create_stop():
 
     return jsonify({
         "message": "Stop created successfully",
-        "stop": {
-            "id": stop.id,
-            "route_id": stop.route_id,
-            "name": stop.name,
-            "latitude": stop.latitude,
-            "longitude": stop.longitude,
-            "sequence": stop.sequence,
-        }
+        "stop": _stop_to_dict(stop)
     }), 201
 
-# ==========================
-# GET ALL STOPS
-# ==========================
-
-@bp.route("/stops", methods=["GET"])
-def get_stops():
-
-    stops = Stop.query.order_by(Stop.sequence).all()
-
-    return jsonify([
-        {
-            "id": stop.id,
-            "route_id": stop.route_id,
-            "name": stop.name,
-            "latitude": stop.latitude,
-            "longitude": stop.longitude,
-            "sequence": stop.sequence
-        }
-        for stop in stops
-    ]), 200
 
 # ==========================
-# GET SINGLE ROUTE
+# DELETE STOP  ← NEW
 # ==========================
 
-@bp.route("/routes/<int:route_id>", methods=["GET"])
-def get_route(route_id):
-
-    route = Route.query.get_or_404(route_id)
-
-    return jsonify(
-        _route_to_dict(route, include_stops=True)
-    ), 200
+@bp.route("/stops/<int:stop_id>", methods=["DELETE"])
+def delete_stop(stop_id):
+    stop = Stop.query.get_or_404(stop_id)
+    db.session.delete(stop)
+    db.session.commit()
+    return jsonify({"message": "Stop deleted successfully"}), 200
 
 
 # ==========================
@@ -231,9 +191,7 @@ def get_route(route_id):
 @bp.route("/submissions", methods=["POST"])
 @jwt_required()
 def create_submission():
-
     user_id = get_jwt_identity()
-
     data = request.get_json()
 
     if not data or "submission_type" not in data or "payload" not in data:
@@ -263,15 +221,8 @@ def create_submission():
 @bp.route("/admin/submissions", methods=["GET"])
 @jwt_required()
 def list_pending_submissions():
-
-    pending = Submission.query.filter_by(
-        status="pending"
-    ).all()
-
-    return jsonify([
-        _submission_to_dict(s)
-        for s in pending
-    ]), 200
+    pending = Submission.query.filter_by(status="pending").all()
+    return jsonify([_submission_to_dict(s) for s in pending]), 200
 
 
 # ==========================
@@ -281,9 +232,7 @@ def list_pending_submissions():
 @bp.route("/admin/submissions/<int:submission_id>/review", methods=["POST"])
 @jwt_required()
 def review_submission(submission_id):
-
     data = request.get_json()
-
     decision = data.get("decision") if data else None
 
     if decision not in ("approved", "rejected"):
@@ -292,14 +241,10 @@ def review_submission(submission_id):
         }), 400
 
     submission = Submission.query.get_or_404(submission_id)
-
     submission.status = decision
-
     db.session.commit()
 
-    return jsonify({
-        "message": f"Submission {decision}"
-    }), 200
+    return jsonify({"message": f"Submission {decision}"}), 200
 
 
 # ==========================
@@ -307,7 +252,6 @@ def review_submission(submission_id):
 # ==========================
 
 def _route_to_dict(route, include_stops=False):
-
     data = {
         "id": route.id,
         "name": route.name,
@@ -327,21 +271,24 @@ def _route_to_dict(route, include_stops=False):
 
     if include_stops:
         data["stops"] = [
-            {
-                "id": stop.id,
-                "name": stop.name,
-                "latitude": stop.latitude,
-                "longitude": stop.longitude,
-                "sequence": stop.sequence,
-            }
-            for stop in route.stops
+            _stop_to_dict(stop) for stop in route.stops
         ]
 
     return data
 
 
-def _submission_to_dict(submission):
+def _stop_to_dict(stop):
+    return {
+        "id": stop.id,
+        "route_id": stop.route_id,
+        "name": stop.name,
+        "latitude": stop.latitude,
+        "longitude": stop.longitude,
+        "sequence": stop.sequence,
+    }
 
+
+def _submission_to_dict(submission):
     return {
         "id": submission.id,
         "user_id": submission.user_id,

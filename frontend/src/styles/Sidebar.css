@@ -4,6 +4,8 @@
   color: white;
   min-height: 100vh;
   padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar h2 {
@@ -11,13 +13,10 @@
   margin-bottom: 40px;
 }
 
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar li {
-  margin-bottom: 18px;
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .sidebar a {
@@ -27,8 +26,29 @@
   padding: 12px;
   border-radius: 8px;
   transition: 0.3s;
+  font-size: 15px;
 }
 
-.sidebar a:hover {
-  background: rgba(255,255,255,.15);
+.sidebar a:hover,
+.sidebar a.active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Logout button â€” matches the nav link style exactly */
+.logout-btn {
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: auto;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
