@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, MarkerF, PolylineF } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
@@ -18,6 +18,7 @@ export default function MapView({ activeRoute, cbdCoordinates }) {
   });
 
   const [map, setMap] = useState(null);
+  const [directionsResponse, setDirectionsResponse] = useState(null);
 
   const onLoad = useCallback(function callback(mapInstance) {
     setMap(mapInstance);
@@ -27,7 +28,10 @@ export default function MapView({ activeRoute, cbdCoordinates }) {
     setMap(null);
   }, []);
 
+  // Reset the route representation whenever a new route is selected
   useEffect(() => {
+    setDirectionsResponse(null);
+
     if (map) {
       if (activeRoute?.center) {
         map.panTo(activeRoute.center);
@@ -38,6 +42,16 @@ export default function MapView({ activeRoute, cbdCoordinates }) {
       }
     }
   }, [activeRoute, map]);
+
+  const directionsCallback = (res) => {
+    if (res !== null) {
+      if (res.status === 'OK') {
+        setDirectionsResponse(res);
+      } else {
+        console.error("Directions request failed: ", res.status);
+      }
+    }
+  };
 
   if (!isLoaded) {
     return (
@@ -65,32 +79,31 @@ export default function MapView({ activeRoute, cbdCoordinates }) {
         fullscreenControl: false,
       }}
     >
-      {activeRoute && activeRoute.center && (
-        <>
-          <MarkerF 
-            position={cbdCoordinates} 
-          />
+      {/* 1. Request the directions using CBD as starting point and activeRoute.center as destination */}
+      {activeRoute && activeRoute.center && cbdCoordinates && directionsResponse === null && (
+        <DirectionsService
+          options={{
+            origin: cbdCoordinates,
+            destination: activeRoute.center,
+            travelMode: 'DRIVING'
+          }}
+          callback={directionsCallback}
+        />
+      )}
 
-          <MarkerF 
-            position={activeRoute.center} 
-            label={{
-              text: activeRoute.number,
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '11px'
-            }}
-          />
-
-          <PolylineF
-            path={activeRoute.path}
-            options={{
-              strokeColor: activeRoute.color,
+      {/* 2. Render the actual road routes if found */}
+      {directionsResponse !== null && (
+        <DirectionsRenderer
+          options={{
+            directions: directionsResponse,
+            polylineOptions: {
+              strokeColor: activeRoute?.color || "#2563EB", 
               strokeOpacity: 0.8,
-              strokeWeight: 6,
-              geodesic: true,
-            }}
-          />
-        </>
+              strokeWeight: 6
+            },
+            suppressMarkers: false // Displays clean starting (A) and ending (B) markers automatically!
+          }}
+        />
       )}
     </GoogleMap>
   );
